@@ -1,9 +1,17 @@
-/**
- * Copyright (C) DataApps Corporation - All Rights Reserved.
- * Unauthorized copying of this file, via any medium is 
- * strictly prohibited.
- * Proprietary and confidential.
- * Written by Benoy Antony <benoy@DataApps.io>, 2015
+/*
+ * Copyright 2016, DataApps Corporation (http://dataApps.io) .
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package io.dataapps.chlorine.hadoop;
 
@@ -20,7 +28,6 @@ import org.apache.hadoop.mapreduce.Job;
 import io.dataapps.chlorine.finder.Finder;
 import io.dataapps.chlorine.finder.FinderEngine;
 
-
 public class DeepScanPipeline  extends AbstractPipeline{
 	static final Log LOG = LogFactory.getLog(DeepScanPipeline.class);
 	String scanPath;
@@ -30,7 +37,6 @@ public class DeepScanPipeline  extends AbstractPipeline{
 	String queue;
 
 	public void run() {
-
 		try {
 			final Path fsScanPath = new Path(scanPath);
 			final Configuration conf = new Configuration();
@@ -73,7 +79,4 @@ public class DeepScanPipeline  extends AbstractPipeline{
 			LOG.error(e);
 		}
 	}
-
-
-
 }
