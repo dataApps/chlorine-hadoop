@@ -5,7 +5,7 @@
  * Proprietary and confidential.
  * Written by Benoy Antony <benoy@DataApps.io>, 2015
  */
-package io.dataapps.chlorine.pip.hadoop;
+package io.dataapps.chlorine.hadoop;
 
 import java.io.IOException;
 
