@@ -92,7 +92,8 @@ public class HDFSScanMR {
 		}
 	}
 
-	public static Job makeJob(Configuration conf, Path in, Path out, long scanSince, String chlorineConfigFilePath, String queue) throws IOException {
+	public static Job makeJob(Configuration conf, Path in, Path out, long scanSince, 
+			String chlorineConfigFilePath, String queue) throws IOException {
 		conf.setBoolean("mapred.output.compress", false);
 		conf.setLong("scanSince", scanSince);
 		if (queue != null) {
