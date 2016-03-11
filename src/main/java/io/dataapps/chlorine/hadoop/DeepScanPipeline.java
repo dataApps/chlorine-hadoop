@@ -49,7 +49,7 @@ public class DeepScanPipeline  extends AbstractPipeline{
 			final Path fsScanPath = new Path(scanPath);
 			final Configuration conf = new Configuration();
 			FileSystem  fs = FileSystem.get(conf);
-			String tempJobOutputDir = jobOutputDir +"_temp";
+			String tempJobOutputDir = jobOutputDir + Path.SEPARATOR + "_temp";
 			if (findersFilePath!= null) {
 				fs.copyFromLocalFile(false, true, new Path(findersFilePath), 
 						new Path("chlorine_finders.xml"));

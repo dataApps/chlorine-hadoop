@@ -30,6 +30,7 @@ public abstract class AbstractPipeline {
 		try {
 			if (!waitForCompletion(j, true)) {
 				LOG.error("Job " + j.getJobName() + " failed.");
+				return false;
 			}
 		} catch (Exception e) {
 			LOG.error(e);
