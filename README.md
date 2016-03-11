@@ -24,7 +24,7 @@ usage: Scan [-help] [-i <path>] [-o <path>] [-q <name>]
  -q,--queue <name>         job queue
 ```
 
-- A sample script to run chlorine-hadoop job on an HDFS directory. The script template available under  [/scripts/chlorine-hadoop.sh(https://github.com/dataApps/chlorine-hadoop/scripts/chlorine-hadoop.sh)]
+- A sample script to run chlorine-hadoop job on an HDFS directory. The script template available under  [/scripts/chlorine-hadoop.sh](https://github.com/dataApps/chlorine-hadoop/scripts/chlorine-hadoop.sh)
 
 ```
  CHLORINE_JAR=/home/benoy/work/chlorine-hadoop/target/chlorine-hadoop-1.1.5-SNAPSHOT.jar
