@@ -14,6 +14,13 @@ Chlorine-hadoop can detect different types of Credit card numbers, SSN, Phone Nu
 
 *mvn install*
 
+
+###To devlop chlorine-hadoop in eclipse
+
+*mvn eclipse:clean eclipse:eclipse*
+
+Then import the projects into the eclipse workspace.
+
 ###To use Chlorine-hadoop
 
 ```
@@ -41,11 +48,12 @@ usage: Scan [-help] [-i <path>] [-inc <file>] [-o <path>] [-q <name>] [-s
 - A sample script to run chlorine-hadoop job on an HDFS directory. The script template available under  [/scripts/chlorine-hadoop.sh](https://github.com/dataApps/chlorine-hadoop/scripts/chlorine-hadoop.sh)
 
 ```
- CHLORINE_JAR=/home/benoy/work/chlorine-hadoop/target/chlorine-hadoop-1.1.5-SNAPSHOT.jar
+CHLORINE_JAR=/home/benoy/work/chlorine-hadoop/target/chlorine-hadoop-1.1.5-SNAPSHOT.jar
 HADOOP_HOME=/apache/hadoop-2.7.1
 HADOOP_CONF=$HADOOP_HOME/etc/hadoop
 HADOOP_JAR_BASE=$HADOOP_HOME/share/hadoop
 HADOOP_JARS=$HADOOP_JAR_BASE/common/*:$HADOOP_JAR_BASE/common/lib/*:$HADOOP_JAR_BASE/hdfs/*:$HADOOP_JAR_BASE/hdfs/lib/*:$HADOOP_JAR_BASE/yarn/*:$HADOOP_JAR_BASE/yarn/lib/*:$HADOOP_JAR_BASE/mapreduce/*:$HADOOP_JAR_BASE/mapeduce/lib/*
+
 java -Xmx1000m -XX:MaxPermSize=128M  -cp $HADOOP_CONF:$CHLORINE_JAR:$HADOOP_JARS io.dataapps.chlorine.hadoop.Scan $*
 
 ```
