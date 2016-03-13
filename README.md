@@ -17,11 +17,25 @@ Chlorine-hadoop can detect different types of Credit card numbers, SSN, Phone Nu
 ###To use Chlorine-hadoop
 
 ```
-usage: Scan [-help] [-i <path>] [-o <path>] [-q <name>]
- -help                     print this message
- -i,--input_path <path>    input path to scan
- -o,--output_path <path>   Output path to store results
- -q,--queue <name>         job queue
+usage: Scan [-help] [-i <path>] [-inc <file>] [-o <path>] [-q <name>] [-s
+       <timeinms>]
+ -help                       print this message
+ -i,--input_path <path>      input path to scan
+ -inc,--incremental <file>   specify scan as incremental and use the
+                             timestemp in the file to determine the files
+                             to scan. If the file is present, the
+                             timestamp will be read from the file. If file
+                             is not present, file is automatically
+                             geneated and updated with a timestamp for
+                             subsequent scans. If both incremental and
+                             scanfrom are specified, then incremental is
+                             ignored.
+ -o,--output_path <path>     Output path to store results
+ -q,--queue <name>           job queue
+ -s,--scanfrom <timeinms>    Scan only files modified on or after the
+                             specific time. The time is specified in
+                             milliseconds after the epoch.
+
 ```
 
 - A sample script to run chlorine-hadoop job on an HDFS directory. The script template available under  [/scripts/chlorine-hadoop.sh](https://github.com/dataApps/chlorine-hadoop/scripts/chlorine-hadoop.sh)
