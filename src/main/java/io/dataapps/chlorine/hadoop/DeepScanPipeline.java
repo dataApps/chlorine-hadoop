@@ -30,11 +30,12 @@ import io.dataapps.chlorine.finder.FinderEngine;
 
 public class DeepScanPipeline  extends AbstractPipeline{
 
-	public DeepScanPipeline(String scanPath, String jobOutputDir, String queue) {
+	public DeepScanPipeline(String scanPath, String jobOutputDir, String queue, long scanSince) {
 		super();
 		this.scanPath = scanPath;
 		this.jobOutputDir = jobOutputDir;
 		this.queue = queue;
+		this.scanSince = scanSince;
 	}
 
 	static final Log LOG = LogFactory.getLog(DeepScanPipeline.class);

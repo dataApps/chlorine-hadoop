@@ -40,7 +40,7 @@ public class NewFilesFilter  implements Configurable, PathFilter {
 			}
 			FileStatus file = fs.getFileStatus(path);
 			long time = file.getModificationTime();
-			boolean result =  (time>cutOffTime); 
+			boolean result = (time>cutOffTime); 
 			return result;
 		} catch (IOException e) {
 			LOG.error(e);
