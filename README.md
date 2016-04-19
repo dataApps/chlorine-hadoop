@@ -24,7 +24,7 @@ Then import the projects into the eclipse workspace.
 ###To use Chlorine-hadoop
 
 ```
-usage: Scan [-help] [-i <path>] [-inc <file>] [-o <path>] [-q <name>] [-s
+usage: ./scripts/chlorine-hadoop.sh [-help] [-i <path>] [-inc <file>] [-o <path>] [-q <name>] [-s
        <timeinms>]
  -help                       print this message
  -i,--input_path <path>      input path to scan
@@ -45,7 +45,9 @@ usage: Scan [-help] [-i <path>] [-inc <file>] [-o <path>] [-q <name>] [-s
 
 ```
 
-- A sample script to run chlorine-hadoop job on an HDFS directory. The script template available under  [/scripts/chlorine-hadoop.sh](https://github.com/dataApps/chlorine-hadoop/scripts/chlorine-hadoop.sh)
+## A sample script to run chlorine-hadoop job on an HDFS directory
+ 
+The script template is available under  [/scripts/chlorine-hadoop.sh](https://github.com/dataApps/chlorine-hadoop/scripts/chlorine-hadoop.sh)
 
 ```
 CHLORINE_JAR=/home/benoy/work/chlorine-hadoop/target/chlorine-hadoop-1.1.5-SNAPSHOT.jar
