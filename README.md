@@ -15,7 +15,7 @@ Chlorine-hadoop can detect different types of Credit card numbers, SSN, Phone Nu
 *mvn install*
 
 
-###To devlop chlorine-hadoop in eclipse
+###To develop chlorine-hadoop in eclipse
 
 *mvn eclipse:clean eclipse:eclipse*
 
