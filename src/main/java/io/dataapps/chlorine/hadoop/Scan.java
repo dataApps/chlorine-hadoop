@@ -57,13 +57,18 @@ public class Scan {
 				.desc("Scan only files modified on or after the specific time. " +
 						"The time is specified in milliseconds after the epoch.")
 						.build();
-
+			
+		Option mask = Option.builder("m")
+				.longOpt("mask")
+				.desc("Copy the input to the output with sensitive values masked.")
+						.build();
 		options.addOption(help);
 		options.addOption(inputPath);
 		options.addOption(outputPath);
 		options.addOption(queue);
 		options.addOption(incremental);
 		options.addOption(scanFrom);
+		options.addOption(mask);
 
 		// create the parser
 		CommandLineParser parser = new DefaultParser();
@@ -73,6 +78,7 @@ public class Scan {
 			String strInputPath=null, strOutputPath=null, strQueue=null;
 			long scanSince = -1;
 			String strIncremental= null; long scanStartTime = 0;
+			boolean maskRequired = false;
 			if(line.hasOption("help")) {
 				usage(options);
 			}
@@ -98,6 +104,9 @@ public class Scan {
 
 			if (line.hasOption("s")) {
 				scanSince = Long.parseLong(line.getOptionValue("s"));
+			} 
+			if (line.hasOption("m")) {
+				maskRequired = true;
 			} 
 
 			System.out.println ("Creating a DeepScan with the following inputs");
@@ -127,7 +136,7 @@ public class Scan {
 				}
 			}
 			DeepScanPipeline deep = 
-					new DeepScanPipeline(strInputPath, strOutputPath, strQueue, scanSince);
+					new DeepScanPipeline(strInputPath, strOutputPath, strQueue, scanSince,maskRequired);
 			deep.run();
 			
 			//update the time stamp in file if incremental is specified.

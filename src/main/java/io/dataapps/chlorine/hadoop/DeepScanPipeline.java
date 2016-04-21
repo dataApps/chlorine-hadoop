@@ -30,12 +30,13 @@ import io.dataapps.chlorine.finder.FinderEngine;
 
 public class DeepScanPipeline  extends AbstractPipeline{
 
-	public DeepScanPipeline(String scanPath, String jobOutputDir, String queue, long scanSince) {
+	public DeepScanPipeline(String scanPath, String jobOutputDir, String queue, long scanSince,boolean maskRequired) {
 		super();
 		this.scanPath = scanPath;
 		this.jobOutputDir = jobOutputDir;
 		this.queue = queue;
 		this.scanSince = scanSince;
+		this.maskRequired = maskRequired;
 	}
 
 	static final Log LOG = LogFactory.getLog(DeepScanPipeline.class);
@@ -44,6 +45,7 @@ public class DeepScanPipeline  extends AbstractPipeline{
 	String findersFilePath;
 	long scanSince;
 	String queue;
+	boolean maskRequired;
 
 	public void run() {
 		try {
@@ -56,7 +58,7 @@ public class DeepScanPipeline  extends AbstractPipeline{
 						new Path("chlorine_finders.xml"));
 			}
 			Job job = HDFSScanMR.makeJob(conf, fsScanPath, 
-					new Path(tempJobOutputDir), scanSince, findersFilePath, queue);
+					new Path(tempJobOutputDir), scanSince, findersFilePath, queue, maskRequired);
 			boolean bResult = runJobToCompletion(job) ;
 			if (bResult) {
 				LOG.info("Total bytes scanned = " +

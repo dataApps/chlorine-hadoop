@@ -1,4 +1,4 @@
-CHLORINE_JAR=<location of the chlorine jar>
+CHLORINE_JAR=/home/benoy/work/chlorine-hadoop/target/chlorine-hadoop-1.1.6-SNAPSHOT.jar
 HADOOP_HOME=/apache/hadoop-2.7.1
 HADOOP_CONF=$HADOOP_HOME/etc/hadoop
 HADOOP_JAR_BASE=$HADOOP_HOME/share/hadoop

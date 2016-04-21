@@ -38,6 +38,8 @@ import org.apache.hadoop.mapreduce.lib.input.TextInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 
 import io.dataapps.chlorine.finder.FinderEngine;
+import io.dataapps.chlorine.mask.MaskFactory;
+import io.dataapps.chlorine.mask.Masker;
 
 /**
  * Feature generation happens in the map phase. For a set of samples, generate a feature vector
@@ -47,6 +49,8 @@ public class HDFSScanMR {
 
 	public static class DeepScanMapper extends Mapper<LongWritable, Text, NullWritable, Text> {
 		private static FinderEngine engine;
+		private boolean maskRequired = false;
+		private static Masker masker;
 		public static final String FIELD_DELIMITER = new String(new char[] {'\t'});
 		protected void setup(Context context) throws IOException {
 
@@ -62,7 +66,10 @@ public class HDFSScanMR {
 			} else {
 				engine = new FinderEngine();
 			}
-
+			maskRequired = conf.getBoolean("maskRequired", false);
+			if (maskRequired) {
+				masker = new MaskFactory(engine).getMasker();
+			}
 		}
 
 		@Override
@@ -70,32 +77,39 @@ public class HDFSScanMR {
 				throws IOException, InterruptedException {
 
 			boolean matchedValue =false;
+			String input = value.toString();
 
 			if (engine == null) throw new IOException("FInderEngine is not set.");
-			Map<String, List<String>> matchesByType = engine.findWithType(value.toString());
+			Map<String, List<String>> matchesByType = engine.findWithType(input);
 			for (Map.Entry<String, List<String>> match: matchesByType.entrySet()) {
 				matchedValue = true;
-				StringBuilder record = new StringBuilder();
-				record.append(match.getKey());
-				record.append(FIELD_DELIMITER);
-				record.append(match.getValue().size());
-				record.append(FIELD_DELIMITER);
-				record.append(StringUtils.join(match.getValue(), ','));					
-				context.write(NullWritable.get(), new Text(record.toString()));
+				if (!maskRequired) {
+					StringBuilder record = new StringBuilder();
+					record.append(match.getKey());
+					record.append(FIELD_DELIMITER);
+					record.append(match.getValue().size());
+					record.append(FIELD_DELIMITER);
+					record.append(StringUtils.join(match.getValue(), ','));					
+					context.write(NullWritable.get(), new Text(record.toString()));
+				}
 				context.getCounter("Feature", "TotalMatches").increment(match.getValue().size());
 				context.getCounter("Feature", match.getKey()).increment(match.getValue().size());
 			}
 			if (matchedValue) {
 				context.getCounter("Feature", "MatchedRecords").increment(1);
 			}
+			if (maskRequired) {
+				context.write(NullWritable.get(), new Text(masker.mask(input)));
+			}
 			context.getCounter("Feature", "TotalSize").increment(value.getLength());
 		}
 	}
 
 	public static Job makeJob(Configuration conf, Path in, Path out, long scanSince, 
-			String chlorineConfigFilePath, String queue) throws IOException {
+			String chlorineConfigFilePath, String queue,boolean maskRequired) throws IOException {
 		conf.setBoolean("mapred.output.compress", false);
 		conf.setLong("scanSince", scanSince);
+		conf.setBoolean("maskRequired", maskRequired);
 		if (queue != null) {
 			conf.set("mapred.job.queue.name", queue);
 		}
