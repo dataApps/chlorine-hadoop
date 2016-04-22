@@ -31,7 +31,13 @@ public class Scan {
 				.longOpt("output_path")
 				.argName("path")
 				.hasArg()
-				.desc("Output path to store results")
+				.desc("Output path")
+				.build();
+		Option saveMatches = Option.builder("sm")
+				.longOpt("save_match")
+				.argName("path")
+				.hasArg()
+				.desc("path to save matches")
 				.build();
 		Option queue = Option.builder("q")
 				.longOpt("queue")
@@ -39,7 +45,6 @@ public class Scan {
 				.hasArg()
 				.desc("job queue")
 				.build();
-
 		Option incremental = Option.builder("inc")
 				.longOpt("incremental")
 				.hasArg()
@@ -49,7 +54,6 @@ public class Scan {
 						"If file is not present, file is automatically geneated and updated with a timestamp for subsequent scans." +
 						" If both incremental and scanfrom are specified, then incremental is ignored.")
 						.build();
-
 		Option scanFrom = Option.builder("s")
 				.longOpt("scanfrom")
 				.argName("timeinms")
@@ -57,14 +61,16 @@ public class Scan {
 				.desc("Scan only files modified on or after the specific time. " +
 						"The time is specified in milliseconds after the epoch.")
 						.build();
-			
 		Option mask = Option.builder("m")
 				.longOpt("mask")
-				.desc("Copy the input to the output with sensitive values masked.")
-						.build();
+				.argName("path")
+				.hasArg()
+				.desc("Copy the input to the specified path with sensitive values masked. The directory structure is retained.")
+				.build();
 		options.addOption(help);
 		options.addOption(inputPath);
 		options.addOption(outputPath);
+		options.addOption(saveMatches);
 		options.addOption(queue);
 		options.addOption(incremental);
 		options.addOption(scanFrom);
@@ -78,7 +84,9 @@ public class Scan {
 			String strInputPath=null, strOutputPath=null, strQueue=null;
 			long scanSince = -1;
 			String strIncremental= null; long scanStartTime = 0;
-			boolean maskRequired = false;
+			String maskPath = null;
+			String matchPath = null;
+
 			if(line.hasOption("help")) {
 				usage(options);
 			}
@@ -93,6 +101,10 @@ public class Scan {
 			} else {
 				usage(options);
 			}
+			
+			if (line.hasOption("sm")) {
+				matchPath = line.getOptionValue("sm");
+			} 
 
 			if (line.hasOption("q")) {
 				strQueue = line.getOptionValue("q");
@@ -106,7 +118,7 @@ public class Scan {
 				scanSince = Long.parseLong(line.getOptionValue("s"));
 			} 
 			if (line.hasOption("m")) {
-				maskRequired = true;
+				maskPath = line.getOptionValue("m");;
 			} 
 
 			System.out.println ("Creating a DeepScan with the following inputs");
@@ -121,6 +133,14 @@ public class Scan {
 			if (scanSince > -1) {
 				System.out.println ("scanfrom=" + scanSince);
 			}
+			if (matchPath != null) {
+				System.out.println ("save Matches at=" + matchPath);
+			}
+			
+			if (maskPath != null) {
+				System.out.println ("Mask and save masked files at=" + maskPath);
+			}
+			
 			if (scanSince == -1 && strIncremental!=null) {
 				File file = new File(strIncremental);
 				scanStartTime = System.currentTimeMillis();
@@ -136,7 +156,7 @@ public class Scan {
 				}
 			}
 			DeepScanPipeline deep = 
-					new DeepScanPipeline(strInputPath, strOutputPath, strQueue, scanSince,maskRequired);
+					new DeepScanPipeline(strInputPath, strOutputPath, matchPath, strQueue, scanSince, maskPath);
 			deep.run();
 			
 			//update the time stamp in file if incremental is specified.

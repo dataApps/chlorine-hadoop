@@ -30,13 +30,14 @@ import io.dataapps.chlorine.finder.FinderEngine;
 
 public class DeepScanPipeline  extends AbstractPipeline{
 
-	public DeepScanPipeline(String scanPath, String jobOutputDir, String queue, long scanSince,boolean maskRequired) {
+	public DeepScanPipeline(String scanPath, String jobOutputDir, String matchPath, String queue, long scanSince, String maskPath) {
 		super();
 		this.scanPath = scanPath;
 		this.jobOutputDir = jobOutputDir;
 		this.queue = queue;
 		this.scanSince = scanSince;
-		this.maskRequired = maskRequired;
+		this.maskPath = maskPath;
+		this.matchPath = matchPath;
 	}
 
 	static final Log LOG = LogFactory.getLog(DeepScanPipeline.class);
@@ -45,20 +46,21 @@ public class DeepScanPipeline  extends AbstractPipeline{
 	String findersFilePath;
 	long scanSince;
 	String queue;
-	boolean maskRequired;
+	String maskPath;
+	String matchPath;
+
 
 	public void run() {
 		try {
 			final Path fsScanPath = new Path(scanPath);
 			final Configuration conf = new Configuration();
 			FileSystem  fs = FileSystem.get(conf);
-			String tempJobOutputDir = jobOutputDir + Path.SEPARATOR + "_temp";
 			if (findersFilePath!= null) {
 				fs.copyFromLocalFile(false, true, new Path(findersFilePath), 
 						new Path("chlorine_finders.xml"));
 			}
 			Job job = HDFSScanMR.makeJob(conf, fsScanPath, 
-					new Path(tempJobOutputDir), scanSince, findersFilePath, queue, maskRequired);
+					new Path(jobOutputDir), matchPath, scanSince, findersFilePath, queue, maskPath);
 			boolean bResult = runJobToCompletion(job) ;
 			if (bResult) {
 				LOG.info("Total bytes scanned = " +
@@ -82,10 +84,20 @@ public class DeepScanPipeline  extends AbstractPipeline{
 										"TotalMatches").getValue());
 					}
 				}
+				if (matchPath != null) {
+					String tempMatchesPath = jobOutputDir + Path.SEPARATOR + "_temp";
+					String matchOutputPath = matchPath + Path.SEPARATOR + "scan_result_" + 
+							scanPath.hashCode() + "_" + scanSince;
+					FileUtil.copyMerge(fs, new Path(tempMatchesPath), fs, new Path(matchOutputPath), true, conf, null);
+					LOG.info("The matches detected are stored in " + matchOutputPath);
+				}
+				
+				if (maskPath != null) {
+					LOG.info("The matches in the input are masked and a copy is kept under " + maskPath);
+
+				}
 			}
-			FileUtil.copyMerge(fs, new Path(tempJobOutputDir), fs, 
-					new Path(jobOutputDir + Path.SEPARATOR + "scan_result" +scanSince), 
-					true, conf, null);
+
 		} catch ( IOException e) {
 			LOG.error(e);
 		}

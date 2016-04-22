@@ -55,11 +55,11 @@ public class HDFSScanMR {
 
 	public static class DeepScanMapper extends Mapper<LongWritable, Text, NullWritable, Text> {
 		private static FinderEngine engine;
-		private boolean maskRequired = false;
 		private static Masker masker;
 		public static final String FIELD_DELIMITER = new String(new char[] {'\t'});
 		protected String filenameKey;
-		private RecordWriter<NullWritable, Text> writer;	
+		private RecordWriter<NullWritable, Text> matchwriter;	
+		private RecordWriter<NullWritable, Text> maskwriter;	
 		protected void setup(Context context) throws IOException, InterruptedException {
 
 			//print class path
@@ -74,40 +74,51 @@ public class HDFSScanMR {
 			} else {
 				engine = new FinderEngine();
 			}		
-			maskRequired = conf.getBoolean("maskRequired", false);
-			if (maskRequired) {
+			String maskPath = conf.get("maskPath");
+			if (maskPath !=null) {
 				masker = new MaskFactory(engine).getMasker();
-			}
+				InputSplit split = context.getInputSplit();
+				Path path = ((FileSplit) split).getPath();
 
-			InputSplit split = context.getInputSplit();
-			Path path = ((FileSplit) split).getPath();
-
-			// extract parent folder and filename
-			int input_path_depth = conf.getInt("input_path_depth", 0);
-			filenameKey = path.getName();
-			Path tempPath = path.getParent();
-			while ( tempPath.depth() > input_path_depth) {
-				filenameKey = tempPath.getName() + "/" + filenameKey;
-				tempPath = tempPath.getParent();
-			}
-
-			// base output folder
-			final Path baseOutputPath = FileOutputFormat.getOutputPath(context);
-			// output file name
-			final Path outputFilePath = new Path(baseOutputPath.getParent(), filenameKey);
-
-			// We need to override the getDefaultWorkFile path to stop the file being created in the _temporary/taskid folder
-			TextOutputFormat<NullWritable, Text> tof = new TextOutputFormat<NullWritable, Text>() {
-				@Override
-				public Path getDefaultWorkFile(TaskAttemptContext context,
-						String extension) throws IOException {
-					return outputFilePath;
+				// extract parent folder and filename
+				int input_path_depth = conf.getInt("input_path_depth", 0);
+				filenameKey = path.getName();
+				Path tempPath = path.getParent();
+				while ( tempPath.depth() > input_path_depth) {
+					filenameKey = tempPath.getName() + Path.SEPARATOR + filenameKey;
+					tempPath = tempPath.getParent();
 				}
-			};
+				// output file name
+				final Path outputFilePath = new Path(maskPath, filenameKey);
 
-			// create a record writer that will write to the desired output subfolder
-			writer = tof.getRecordWriter(context);
+				// We need to override the getDefaultWorkFile path to stop the file being created in the _temporary/taskid folder
+				TextOutputFormat<NullWritable, Text> tof = new TextOutputFormat<NullWritable, Text>() {
+					@Override
+					public Path getDefaultWorkFile(TaskAttemptContext context,
+							String extension) throws IOException {
+						return outputFilePath;
+					}
+				};
+				// create a record writer that will write to the desired output subfolder
+				maskwriter = tof.getRecordWriter(context);
+			}
+			final String matchPath = conf.get("matchPath");
 
+			if (matchPath !=null) {
+				// output file name
+				final Path baseOutputPath = new Path(FileOutputFormat.getOutputPath(context), "_temp");
+
+				// We need to override the getDefaultWorkFile path to stop the file being created in the _temporary/taskid folder
+				TextOutputFormat<NullWritable, Text> tof = new TextOutputFormat<NullWritable, Text>() {
+					@Override
+					public Path getDefaultWorkFile(TaskAttemptContext context,
+							String extension) throws IOException {
+						return new Path(baseOutputPath, context.getTaskAttemptID().toString());
+					}
+				};
+				// create a record writer that will write to the desired output subfolder
+				matchwriter = tof.getRecordWriter(context);
+			}
 		}
 
 		@Override
@@ -120,21 +131,23 @@ public class HDFSScanMR {
 			Map<String, List<String>> matchesByType = engine.findWithType(input);
 			for (Map.Entry<String, List<String>> match: matchesByType.entrySet()) {
 				matchedValue = true;
-				StringBuilder record = new StringBuilder();
-				record.append(match.getKey());
-				record.append(FIELD_DELIMITER);
-				record.append(match.getValue().size());
-				record.append(FIELD_DELIMITER);
-				record.append(StringUtils.join(match.getValue(), ','));					
-				context.write(NullWritable.get(), new Text(record.toString()));
+				if (matchwriter !=null) {
+					StringBuilder record = new StringBuilder();
+					record.append(match.getKey());
+					record.append(FIELD_DELIMITER);
+					record.append(match.getValue().size());
+					record.append(FIELD_DELIMITER);
+					record.append(StringUtils.join(match.getValue(), ','));					
+					matchwriter.write(NullWritable.get(), new Text(record.toString()));
+				}
 				context.getCounter("Feature", "TotalMatches").increment(match.getValue().size());
 				context.getCounter("Feature", match.getKey()).increment(match.getValue().size());
 			}
 			if (matchedValue) {
 				context.getCounter("Feature", "MatchedRecords").increment(1);
 			}
-			if (maskRequired) {
-				writer.write(NullWritable.get(), new Text(masker.mask(input)));
+			if (maskwriter !=null) {
+				maskwriter.write(NullWritable.get(), new Text(masker.mask(input)));
 			}
 			context.getCounter("Feature", "TotalSize").increment(value.getLength());
 		}
@@ -142,23 +155,23 @@ public class HDFSScanMR {
 		@Override
 		protected void cleanup(Context context) throws IOException,
 		InterruptedException {
-			writer.close(context);
+			maskwriter.close(context);
 		}
 	}
 
-	public static Job makeJob(Configuration conf, Path in, Path out, long scanSince, 
-			String chlorineConfigFilePath, String queue,boolean maskRequired) throws IOException {
+	public static Job makeJob(Configuration conf, Path in, Path out, String matchPath, long scanSince, 
+			String chlorineConfigFilePath, String queue, String maskPath) throws IOException {
 		conf.setBoolean("mapred.output.compress", false);
 		conf.setLong("scanSince", scanSince);
-		conf.setBoolean("maskRequired", maskRequired);
+		conf.set("matchPath", matchPath);
+		conf.set("maskPath", maskPath);
 		if (queue != null) {
 			conf.set("mapred.job.queue.name", queue);
 		}
 		conf.set("fs.permissions.umask-mode", 
 				"007");
 		conf.setInt("input_path_depth", in.depth());
-		Job job = Job.getInstance(conf, "Chlorine Scan and Mask");
-		job.setJarByClass(HDFSScanMR.class);
+		Job job = Job.getInstance(conf, "Chlorine_HDFS_Scan");
 		if (chlorineConfigFilePath != null) {
 			try {
 				job.addCacheFile(new URI(chlorineConfigFilePath));
