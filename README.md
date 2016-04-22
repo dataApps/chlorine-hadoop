@@ -104,38 +104,22 @@ Mask and save masked files at=/user/benoy/data
 ```
 hadoop fs -cat /user/benoy/1/scan_result0
 
-Email	1	tests@tetts.com
-SSN-dashes	1	608-34-2345
-IPV4	1	123.34.456.23
-Street Address	1	1234 sdsfd dr
-Email	1	teret@dfdfd.com
-SSN-dashes	1	604-13-4345
-IPV4	1	123.33.234.13
-Street Address	1	1234 gsfsffs pl
-Email	1	tests@tetts.com
-SSN-dashes	1	608-34-2345
-IPV4	1	123.34.456.23
-Street Address	1	1234 sdsfd dr
-Email	1	teret@dfdfd.com
-SSN-dashes	1	604-13-4345
-IPV4	1	123.33.234.13
-Street Address	1	1234 gsfsffs pl
-Email	1	three@three.com
-SSN-dashes	1	609-34-2345
-IPV4	1	131.34.456.23
-Street Address	1	1234 sdsfd dr
-Email	1	four@four.com
-SSN-dashes	1	607-13-4345
-IPV4	1	153.33.234.13
-Street Address	1	1234 gs pl
-Email	1	three@three.com
-SSN-dashes	1	609-34-2345
-IPV4	1	131.34.456.23
-Street Address	1	1234 sdsfd dr
-Email	1	four@four.com
-SSN-dashes	1	607-13-4345
-IPV4	1	153.33.234.13
-Street Address	1	1234 gs pl
+/data/csv_nohive/2015/08/31/user1.csv	Email	1	tests@tetts.com
+/data/csv_nohive/2015/08/31/user1.csv	SSN-dashes	1	608-34-2345
+/data/csv_nohive/2015/08/31/user1.csv	IPV4	1	123.34.456.23
+/data/csv_nohive/2015/08/31/user1.csv	StreetAddress	1	1234 sdsfd dr
+/data/csv_nohive/2015/08/31/user1.csv	Email	1	teret@dfdfd.com
+/data/csv_nohive/2015/08/31/user1.csv	SSN-dashes	1	604-13-4345
+/data/csv_nohive/2015/08/31/user1.csv	IPV4	1	123.33.234.13
+/data/csv_nohive/2015/08/31/user1.csv	StreetAddress	1	1234 gsfsffs pl
+/data/csv_nohive/2015/09/01/user2.csv	Email	1	three@three.com
+/data/csv_nohive/2015/09/01/user2.csv	SSN-dashes	1	609-34-2345
+/data/csv_nohive/2015/09/01/user2.csv	IPV4	1	131.34.456.23
+/data/csv_nohive/2015/09/01/user2.csv	StreetAddress	1	1234 sdsfd dr
+/data/csv_nohive/2015/09/01/user2.csv	Email	1	four@four.com
+/data/csv_nohive/2015/09/01/user2.csv	SSN-dashes	1	607-13-4345
+/data/csv_nohive/2015/09/01/user2.csv	IPV4	1	153.33.234.13
+/data/csv_nohive/2015/09/01/user2.csv	StreetAddress	1	1234 gs pl
 
 
 ```
@@ -147,9 +131,10 @@ The out schema is as follows:
 
 | column position | name | description |
 | --- | --- |--- | 
-|1|Type| sensitive data type. eg: email, credit card. This will be the name of the finder|
-|2|count| number of sensitive elements found in a specific column of a specific sensitive element type|
-|3|values| comma spearated list of sensitive data values found|
+|1|Source File Path| Path to the file which contains the sensitive data|
+|2|Type| sensitive data type. eg: email, credit card. This will be the name of the finder|
+|3|count| number of sensitive elements found in a specific column of a specific sensitive element type|
+|4|values| comma spearated list of sensitive data values found|
 
 
 ### Download library jar
