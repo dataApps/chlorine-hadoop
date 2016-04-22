@@ -24,8 +24,8 @@ Then import the projects into the eclipse workspace.
 ###To use Chlorine-hadoop
 
 ```
-usage: ./scripts/chlorine-hadoop.sh [-help] [-i <path>] [-inc <file>] [-o <path>] [-q <name>] [-s
-       <timeinms>]
+usage: Scan [-help] [-i <path>] [-inc <file>] [-m <path>] [-o <path>] [-q
+       <name>] [-s <timeinms>] [-sm <path>]
  -help                       print this message
  -i,--input_path <path>      input path to scan
  -inc,--incremental <file>   specify scan as incremental and use the
@@ -37,14 +37,15 @@ usage: ./scripts/chlorine-hadoop.sh [-help] [-i <path>] [-inc <file>] [-o <path>
                              subsequent scans. If both incremental and
                              scanfrom are specified, then incremental is
                              ignored.
- -m,--mask                   Copy the input to the output with sensitive
-                             values masked.
- -o,--output_path <path>     Output path to store results
+ -m,--mask <path>            Copy the input to the specified path with
+                             sensitive values masked. The directory
+                             structure is retained.
+ -o,--output_path <path>     Output path
  -q,--queue <name>           job queue
  -s,--scanfrom <timeinms>    Scan only files modified on or after the
                              specific time. The time is specified in
                              milliseconds after the epoch.
-
+ -sm,--save_match <path>     path to save matches
 ```
 
 ## A sample script to run chlorine-hadoop job on an HDFS directory
@@ -65,32 +66,36 @@ java -Xmx1000m -XX:MaxPermSize=128M  -cp $HADOOP_CONF:$CHLORINE_JAR:$HADOOP_JARS
 ###A sample run
 
 ```
-benoy:~/work/chlorine-hadoop$ ../scripts/chlorine-hadoop.sh -i /data/csv_nohive -o /user/benoy/2 -q regular
+./scripts/chlorine-hadoop.sh -i /data/csv_nohive -o /user/benoy/23 -sm /user/benoy/matches -q regular -m /user/benoy/data
 
 Creating a DeepScan with the following inputs
 input-path=/data/csv_nohive
-output-path=/user/benoy/2
+output-path=/user/benoy/23
 queue=regular
-16/03/11 11:06:25 WARN util.NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
-16/03/11 11:06:26 INFO Configuration.deprecation: mapred.output.compress is deprecated. Instead, use mapreduce.output.fileoutputformat.compress
-16/03/11 11:06:26 INFO Configuration.deprecation: mapred.job.queue.name is deprecated. Instead, use mapreduce.job.queuename
-16/03/11 11:06:26 INFO hadoop.AbstractPipeline: ***********Run job: HDFSScan
-16/03/11 11:06:26 INFO client.RMProxy: Connecting to ResourceManager at /0.0.0.0:8032
-16/03/11 11:06:26 WARN mapreduce.JobResourceUploader: Hadoop command-line option parsing not performed. Implement the Tool interface and execute your application with ToolRunner to remedy this.
-16/03/11 11:06:26 INFO input.FileInputFormat: Total input paths to process : 4
-16/03/11 11:06:26 INFO mapreduce.JobSubmitter: number of splits:4
-16/03/11 11:06:26 INFO mapreduce.JobSubmitter: Submitting tokens for job: job_1457715024866_0009
-16/03/11 11:06:27 INFO impl.YarnClientImpl: Submitted application application_1457715024866_0009
-16/03/11 11:06:27 INFO mapreduce.Job: The url to track the job: http://benoy-Satellite-C55-C:8088/proxy/application_1457715024866_0009/
-16/03/11 11:06:42 INFO hadoop.AbstractPipeline: Job HDFSScan successful.
-16/03/11 11:06:42 INFO hadoop.DeepScanPipeline: Total bytes scanned = 896
-16/03/11 11:06:42 INFO hadoop.DeepScanPipeline: Total records scanned = 8
-16/03/11 11:06:42 INFO hadoop.DeepScanPipeline: Total Matched records = 8
-16/03/11 11:06:42 INFO hadoop.DeepScanPipeline: Total matches = 32
-16/03/11 11:06:42 INFO hadoop.DeepScanPipeline: Email = 32
-16/03/11 11:06:42 INFO hadoop.DeepScanPipeline: IPV4 = 32
-16/03/11 11:06:42 INFO hadoop.DeepScanPipeline: Street Address = 32
-16/03/11 11:06:42 INFO hadoop.DeepScanPipeline: SSN-dashes = 32
+save Matches at=/user/benoy/matches
+Mask and save masked files at=/user/benoy/data
+16/04/22 10:50:04 WARN util.NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+16/04/22 10:50:05 INFO Configuration.deprecation: mapred.output.compress is deprecated. Instead, use mapreduce.output.fileoutputformat.compress
+16/04/22 10:50:05 INFO Configuration.deprecation: mapred.job.queue.name is deprecated. Instead, use mapreduce.job.queuename
+16/04/22 10:50:05 INFO hadoop.AbstractPipeline: ***********Run job: Chlorine Scan and Mask
+16/04/22 10:50:05 INFO client.RMProxy: Connecting to ResourceManager at /0.0.0.0:8032
+16/04/22 10:50:05 WARN mapreduce.JobResourceUploader: Hadoop command-line option parsing not performed. Implement the Tool interface and execute your application with ToolRunner to remedy this.
+16/04/22 10:50:05 INFO input.FileInputFormat: Total input paths to process : 2
+16/04/22 10:50:05 INFO mapreduce.JobSubmitter: number of splits:2
+16/04/22 10:50:06 INFO mapreduce.JobSubmitter: Submitting tokens for job: job_1461174733991_0029
+16/04/22 10:50:06 INFO impl.YarnClientImpl: Submitted application application_1461174733991_0029
+16/04/22 10:50:06 INFO mapreduce.Job: The url to track the job: http://benoy-Satellite-C55-C:8088/proxy/application_1461174733991_0029/
+16/04/22 10:50:21 INFO hadoop.AbstractPipeline: Job Chlorine Scan and Mask successful.
+16/04/22 10:50:21 INFO hadoop.DeepScanPipeline: Total bytes scanned = 448
+16/04/22 10:50:21 INFO hadoop.DeepScanPipeline: Total records scanned = 4
+16/04/22 10:50:21 INFO hadoop.DeepScanPipeline: Total Matched records = 4
+16/04/22 10:50:21 INFO hadoop.DeepScanPipeline: Total matches = 16
+16/04/22 10:50:21 INFO hadoop.DeepScanPipeline: Email = 16
+16/04/22 10:50:21 INFO hadoop.DeepScanPipeline: IPV4 = 16
+16/04/22 10:50:21 INFO hadoop.DeepScanPipeline: StreetAddress = 16
+16/04/22 10:50:21 INFO hadoop.DeepScanPipeline: SSN-dashes = 16
+16/04/22 10:50:21 INFO hadoop.DeepScanPipeline: The matches detected are stored in /user/benoy/matches/scan_result_-996967296_-1
+16/04/22 10:50:21 INFO hadoop.DeepScanPipeline: The matches in the input are masked and a copy is kept under /user/benoy/data
 
 ```
 
