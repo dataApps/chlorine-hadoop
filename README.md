@@ -1,9 +1,9 @@
 # chlorine-hadoop
 *Detect sensitive data in Hadoop*
 
-The chlorine-hadoop library defines a mapreduce program which can be used to detect sensitive elements in HDFS directoires. It is Java based.
+The chlorine-hadoop library defines a mapreduce program which can be used to detect and mask sensitive elements in HDFS directoires. It is Java based.
 
-Chlorine-hadoop can detect different types of Credit card numbers, SSN, Phone Numbers, email adddresses, Ip Addresses, Street Addresses in HDFS datasets. It works with compressed text files.
+Chlorine-hadoop can detect different types of Credit card numbers, SSN, Phone Numbers, email adddresses, Ip Addresses, Street Addresses in HDFS datasets. It works with compressed text files. Optionally, it can mask the sensitive elements detected.
 
 
 ###To Download source code
@@ -37,6 +37,8 @@ usage: ./scripts/chlorine-hadoop.sh [-help] [-i <path>] [-inc <file>] [-o <path>
                              subsequent scans. If both incremental and
                              scanfrom are specified, then incremental is
                              ignored.
+ -m,--mask                   Copy the input to the output with sensitive
+                             values masked.
  -o,--output_path <path>     Output path to store results
  -q,--queue <name>           job queue
  -s,--scanfrom <timeinms>    Scan only files modified on or after the
