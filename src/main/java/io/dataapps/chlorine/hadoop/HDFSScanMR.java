@@ -58,7 +58,8 @@ public class HDFSScanMR {
 		private static Masker masker;
 		public static final String FIELD_DELIMITER = new String(new char[] {'\t'});
 		private RecordWriter<NullWritable, Text> matchwriter;	
-		private RecordWriter<NullWritable, Text> maskwriter;	
+		private RecordWriter<NullWritable, Text> maskwriter;
+		private String fullFilePath;	
 		protected void setup(Context context) throws IOException, InterruptedException {
 
 			//print class path
@@ -73,20 +74,23 @@ public class HDFSScanMR {
 			} else {
 				engine = new FinderEngine();
 			}		
+			InputSplit split = context.getInputSplit();
+			Path path = ((FileSplit) split).getPath();
+
+			// extract parent folder and filename
+			int input_path_depth = conf.getInt("input_path_depth", 0);
+			String filenameKey = path.getName();
+			Path tempPath = path.getParent();
+			while ( tempPath.depth() > input_path_depth) {
+				filenameKey = tempPath.getName() + Path.SEPARATOR + filenameKey;
+				tempPath = tempPath.getParent();
+			}
+			
+			fullFilePath = conf.get("inputPath") + Path.SEPARATOR + filenameKey;
+
 			String maskPath = conf.get("maskPath");
 			if (maskPath !=null) {
 				masker = new MaskFactory(engine).getMasker();
-				InputSplit split = context.getInputSplit();
-				Path path = ((FileSplit) split).getPath();
-
-				// extract parent folder and filename
-				int input_path_depth = conf.getInt("input_path_depth", 0);
-				String filenameKey = path.getName();
-				Path tempPath = path.getParent();
-				while ( tempPath.depth() > input_path_depth) {
-					filenameKey = tempPath.getName() + Path.SEPARATOR + filenameKey;
-					tempPath = tempPath.getParent();
-				}
 				// output file name
 				final Path outputFilePath = new Path(maskPath, filenameKey);
 
@@ -132,6 +136,8 @@ public class HDFSScanMR {
 				matchedValue = true;
 				if (matchwriter !=null) {
 					StringBuilder record = new StringBuilder();
+					record.append(fullFilePath);
+					record.append(FIELD_DELIMITER);
 					record.append(match.getKey());
 					record.append(FIELD_DELIMITER);
 					record.append(match.getValue().size());
@@ -164,6 +170,7 @@ public class HDFSScanMR {
 		conf.setLong("scanSince", scanSince);
 		conf.set("matchPath", matchPath);
 		conf.set("maskPath", maskPath);
+		conf.set("inputPath", in.toString());
 		if (queue != null) {
 			conf.set("mapred.job.queue.name", queue);
 		}
@@ -171,6 +178,7 @@ public class HDFSScanMR {
 				"007");
 		conf.setInt("input_path_depth", in.depth());
 		Job job = Job.getInstance(conf, "Chlorine_HDFS_Scan");
+		job.setJarByClass(HDFSScanMR.class);
 		if (chlorineConfigFilePath != null) {
 			try {
 				job.addCacheFile(new URI(chlorineConfigFilePath));
