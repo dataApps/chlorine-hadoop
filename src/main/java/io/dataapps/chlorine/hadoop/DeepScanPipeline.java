@@ -83,11 +83,9 @@ public class DeepScanPipeline  extends AbstractPipeline{
 					}
 				}
 			}
-
 			FileUtil.copyMerge(fs, new Path(tempJobOutputDir), fs, 
 					new Path(jobOutputDir + Path.SEPARATOR + "scan_result" +scanSince), 
 					true, conf, null);
-
 		} catch ( IOException e) {
 			LOG.error(e);
 		}
