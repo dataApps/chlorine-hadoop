@@ -57,7 +57,6 @@ public class HDFSScanMR {
 		private static FinderEngine engine;
 		private static Masker masker;
 		public static final String FIELD_DELIMITER = new String(new char[] {'\t'});
-		protected String filenameKey;
 		private RecordWriter<NullWritable, Text> matchwriter;	
 		private RecordWriter<NullWritable, Text> maskwriter;	
 		protected void setup(Context context) throws IOException, InterruptedException {
@@ -82,7 +81,7 @@ public class HDFSScanMR {
 
 				// extract parent folder and filename
 				int input_path_depth = conf.getInt("input_path_depth", 0);
-				filenameKey = path.getName();
+				String filenameKey = path.getName();
 				Path tempPath = path.getParent();
 				while ( tempPath.depth() > input_path_depth) {
 					filenameKey = tempPath.getName() + Path.SEPARATOR + filenameKey;
